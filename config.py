@@ -18,10 +18,10 @@ config = {
     # =============================================================================
     # LORA CONFIGURATION
     # =============================================================================
-    "lora_r": 64,                     # LoRA rank - higher = more capacity
-    "lora_alpha": 32,                 # LoRA alpha scaling
-    "lora_dropout": 0.0,              # Dropout, 0 is usually fine
-    "target_modules": [               # Modules to apply LoRA
+    "lora_r": 128,  # LoRA rank - higher = more capacity, Suggested 8, 16, 32, 64, 128, chose higher due to CPT
+    "lora_alpha": 32, # LoRA alpha scaling, use 32 for increased stability
+    "lora_dropout": 0.0,  # Dropout, 0 for maximal throughput with CPT
+    "target_modules": [  # Modules to apply LoRA to
         "q_proj", "k_proj", "v_proj", "o_proj",
         "gate_proj", "up_proj", "down_proj",
         "embed_tokens", "lm_head"
@@ -31,11 +31,11 @@ config = {
     # TRAINING HYPERPARAMETERS
     # =============================================================================
 
-    "full_epoch": True, # If True, runs for 'num_train_epochs'; otherwise, runs for 'max_steps'
+    "full_epoch": True, # If True, runs for 'num_train_epochs' otherwise runs for 'max_steps'
     "per_device_train_batch_size": 2,
     "gradient_accumulation_steps": 8,
-    "max_steps": 500, 
-    "num_train_epochs": 1,
+    "max_steps": 100, # useful for quick testing if things are running smoothly
+    "num_train_epochs": 1, # if computationally feasible increase to 2-3 to improve learning
     "warmup_steps": 50,
     "learning_rate": 5e-5,
     "embedding_learning_rate": 1e-5,
