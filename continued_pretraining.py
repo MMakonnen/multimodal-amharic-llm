@@ -14,6 +14,7 @@ from config import config
 
 # Set env variable
 os.environ["UNSLOTH_RETURN_LOGITS"] = "1"  # Disable CCE since it's not supported for CPT
+# -> CHECK IF EQUIVALENT TO: %env UNSLOTH_RETURN_LOGITS=1 # Run this to disable CCE since it is not supported for CPT
 
 # =============================================================================
 # MODEL LOADING
@@ -66,6 +67,7 @@ model = FastLanguageModel.get_peft_model(
 percent_int = int(config["fraction"] * 100)
 fraction_suffix = f"_{percent_int:03d}"
 dataset_path = os.path.join(config["data_dir"], config["data_name_base"] + fraction_suffix)
+# -> CHECK IF LAST LINE IS CORRECT DATA PATH, should be like: "data/amharic-redpajama-synthetic_005"
 
 print("Loading dataset...")
 dataset = load_from_disk(dataset_path)
@@ -78,6 +80,7 @@ def formatting_prompts_func(examples):
 
 print("Formatting dataset...")
 dataset = dataset.map(formatting_prompts_func, batched=True)
+# -> DOUBLE CHECK IF FORMAT CORRECTLY FOR MODEL !!!
 
 # =============================================================================
 # TRAINER SETUP
@@ -128,6 +131,7 @@ trainer = UnslothTrainer(
 
 print("Starting continued pretraining...")
 trainer_stats = trainer.train()
+# MIGHT THROW THIS ERROR, IF YES CHECK HERE: https://github.com/unslothai/unsloth/issues/2127
 
 # =============================================================================
 # AFTER TRAINING
