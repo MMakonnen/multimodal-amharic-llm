@@ -1,20 +1,11 @@
-
 TODOS
-- integrate data pipeline with CPT
+- integrate data pipeline with CPT (real data only variant and extended data variant with synthetic)
 - introduce train test validation splits
 - run MVP on euler cluster
 - setup conda env: python 3.10, ... -> update yaml
-- add instruction finetuning script
+- add instruction finetuning
 - modularize scripts (functions usw.)
-- assembly final data (/ pipeline)
-- retrain tokenizer with final data
-- setup pipeline to run with: real data only, real data + their synthetic
-
-
-NOW
-- set pretrainig hyperpar in config file
-- move stuff to github + gitignores ...
-- discuss / make plan for report
-- discuss with others next steps ahead
-- check data prep script + glue pipeline together
-- test pipeline on Google Collab + debug
+- retrain tokenizer with real data only
+- discuss and plan next steps
+- discuss and plan report
+- while euler is down test run pipeline on google collab
