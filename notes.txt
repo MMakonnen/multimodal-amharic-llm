@@ -9,3 +9,4 @@ TODOS
 - discuss and plan next steps
 - discuss and plan report
 - while euler is down test run pipeline on google collab
+- look some more into datasets and inspect data quality !!!, data correctly formatted for ideal training and mapped properly?
