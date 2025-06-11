@@ -1,0 +1,20 @@
+
+TODOS
+- integrate data pipeline with CPT
+- introduce train test validation splits
+- run MVP on euler cluster
+- setup conda env: python 3.10, ... -> update yaml
+- add instruction finetuning script
+- modularize scripts (functions usw.)
+- assembly final data (/ pipeline)
+- retrain tokenizer with final data
+- setup pipeline to run with: real data only, real data + their synthetic
+
+
+NOW
+- set pretrainig hyperpar
+- move stuff to github + gitignores ...
+- discuss / make plan for report
+- discuss with others next steps ahead
+- check data prep script + glue pipeline together
+- test pipeline on Google Collab + debug
