@@ -1,2 +1,7 @@
 amharic_tokenizer/cache
 amharic_tokenizer/gmon.out
+cache
+pipeline_under_dev
+__pycache__
+.DS_Store
+ref_code
