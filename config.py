@@ -3,7 +3,7 @@ config = {
     # DATASET SETTINGS
     # =============================================================================
     "data_id": "iocuydi/amharic-redpajama-synthetic",
-    "fraction": 0.10,
+    "fraction": 0.05,
     "data_dir": "data",
     "data_name_base": "amharic-redpajama-synthetic",
     "data_cache_dir": "./cache",
