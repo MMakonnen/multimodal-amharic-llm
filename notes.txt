@@ -12,7 +12,7 @@ TODOS
 
 
 NOW
-- set pretrainig hyperpar
+- set pretrainig hyperpar in config file
 - move stuff to github + gitignores ...
 - discuss / make plan for report
 - discuss with others next steps ahead
