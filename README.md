@@ -1,58 +1,38 @@
 # Multimodal Amharic LLM
+Follow the instructions below to run the full pipeline.
 
-1. to recreate conda env locally run:
-    conda env create -f env.yml
-when on a cluster, try: 
-    conda env create -f env_cluster.yml
-
-2. to login using the huggingface cli (after having requested access to gated 
-community models like llama), run
-    huggingface-cli login
-3. then run the main file to download data and train tokenizer at
-    multimodal-amharic-llm/amharic_tokenizer/main.py
-
-### Finetuning README
-
-Run the minimal test to verify everything works:
+## Environment Setup
 ```bash
-python test_finetuning.py
+conda env create -f env.yml
 ```
 
-
-This will:
-- Check GPU and CUDA availability
-- Run a 2-step training test
-
-### Process Amharic Datasets for Finetuning
-
-The `new_data_proc.py` script processes Amharic instruction datasets:
-
-
-**Features:**
-- Processes Amharic Alpaca and Dolly datasets from HuggingFace
-- Creates QA data wuth  multilingual responses and translation tasks
-- Generates train/test splits
-
-**Dataset Sources:**
-- `iocuydi/amharic-alpaca` - Amharic instruction-following data
-- `iocuydi/amharic-dolly-15k` - Amharic question-answering data
-
-You can consult `test_data_pipeline.py` to see how to generate the data. In general, you want to set all flags as True.
-
-### Instruction Finetuning
-
-### Configuration
-
-The finetuning script `instruction_finetuning.py` has two modes:
-
-**Test Mode** (Was used by me just to check that it works):
-```python
-USE_TEST_CONFIG = True  # in instruction_finetuning.py
+when on a cluster, try: 
+```bash
+conda env create -f env_cluster.yml
 ```
 
-**Regular Mode** (for full training):
-```python
-USE_TEST_CONFIG = False  # in instruction_finetuning.py
-```
+## Tokenizer
+Use `amharic_tokenizer/train.py` for training.  
+`amharic_tokenizer/test.py` performs a sanity test.  
+- Data sources: `l-jiao/amharic-news`, `l-jiao/amharic-wikipedia`, `ljiao-amharic-common-crawl`
 
-P.S.: I used LLM to add some comments and pretty prints in tests files (I mean, I did read them, it's not like they are misleading or false), hope it will also help
+## Pretraining
+Follow the steps in order:  
+1. Modify the JSON in `config.py` to choose the datasets, model settings, lora config, training hyperparams.
+1. Use `data_prep.py` to download the datasets.  
+1. Launch `continued_pretraining.py`.  
+- Data sources: `iocuydi/amharic-redpajama-synthetic`, `l-jiao/amharic-news`, `l-jiao/amharic-wikipedia`, `ljiao-amharic-common-crawl`
+
+## Finetuning
+Follow the steps in order:  
+1. Modify the JSON in `finetune_config_full.py` to choose the training hyperparams, and set the path to the pretrained model. No need to set the dataset paths here, as they are set in `new_data_proc.py`. The lora settings cannot be changed anymore at this stage.    
+1. Use `new_data_proc.py` to download the datasets.  
+1. Run `instruction_finetuning.py`.  
+- Data sources: `iocuydi/amharic-alpaca`, `iocuydi/amharic-dolly-15k`  
+
+## Inference
+Use `final_inference_test.py`.  
+
+## Benchmarking
+TODO.   
+- Data sources: Maybe `CohereLabs/Global-MMLU`, can also translate ourselves.  
