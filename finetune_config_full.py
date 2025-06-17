@@ -8,8 +8,8 @@ finetune_config = {
         # Model settings - can use continued pretrained model
         "base_model_path": "pretrained_models/lora_cpt_Llama-3.2-1B-bnb-4bit-seed42", # Path to your continued pretrained model, or use config["model_id"]
         "use_pretrained_checkpoint": False,  # False to train from llama3 base, True to train from continued pretrained checkpoint
-        "model_id": "unsloth/Llama-3.2-1B-bnb-4bit",  # Base model ID for tokenizer
-        "tokenizer_path": "rasyosef_tokenizer",  
+        "model_id": "rasyosef/Llama-3.2-1B-Amharic",  # Base model ID 
+        "tokenizer_path": "./rasyosef_tokenizer_w_special_tokens",  
 
         # Training hyperparameters for instruction finetuning
         "per_device_train_batch_size": 8,
@@ -44,8 +44,11 @@ test_config = {
         
         # Model settings
         "base_model_path": "pretrained_models/lora_cpt_Llama-3.2-1B-bnb-4bit-seed42",
-        "use_pretrained_checkpoint": True,
+        "use_pretrained_checkpoint": False,
         
+        "model_id": "rasyosef/Llama-3.2-1B-Amharic",  # Base model ID 
+        "tokenizer_path": "./rasyosef_tokenizer_w_special_tokens",  
+
         # Minimal training settings
         "per_device_train_batch_size": 1,
         "gradient_accumulation_steps": 1,  # No accumulation
@@ -56,8 +59,6 @@ test_config = {
         "embedding_learning_rate": 1e-6,
         "weight_decay": 0.0,
         
-        # Minimal LoRA settings
-        "target_modules": ["q_proj"],  # Just one module
         
         # Output settings
         "output_dir": "test_finetuned_models",

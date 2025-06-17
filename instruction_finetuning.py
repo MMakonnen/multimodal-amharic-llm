@@ -11,15 +11,12 @@ from transformers import AutoTokenizer
 import finetune_config_full
 
 
-# Load config
-from config import config
-
 # Set env variable
 os.environ["UNSLOTH_RETURN_LOGITS"] = "1"
 
 
 # Set this to True to use minimal resources for testing
-USE_TEST_CONFIG = False
+USE_TEST_CONFIG = True
 
 if USE_TEST_CONFIG:
     print("⚠️  USING TEST CONFIGURATION")
@@ -54,9 +51,9 @@ def format_instruction_from_processed_data(examples):
         else:
             # Use the full prompt format with instruction and response
             text = f'''<|begin_of_text|><|user|>
-            {input_text}<|end_of_text|>
+            {input_text}<|end_of_turn|>
             <|assistant|>
-            {output_text}<|end_of_text|>'''
+            {output_text}<|end_of_turn|>'''
 
             texts.append(text)
     
@@ -74,7 +71,7 @@ def load_model_and_tokenizer():
         model_path = finetune_config["base_model_path"]
         print(f"Loading continued pretrained model from: {model_path}")
     else:
-        model_path = config["model_id"]
+        model_path = finetune_config["model_id"]
         print(f"Loading base model: {model_path}")
     
 
@@ -106,22 +103,14 @@ def load_model_and_tokenizer():
     
     
     # Load custom tokenizer
-    print("Loading custom Amharic tokenizer...")
-    tokenizer = AutoTokenizer.from_pretrained(config["tokenizer_path"])
-    
+    print("Loading custom Amharic tokenizer from:", finetune_config["tokenizer_path"])
+    tokenizer = AutoTokenizer.from_pretrained(finetune_config["tokenizer_path"])
+
     # Handle vocabulary size mismatch
     if len(tokenizer) != len(base_tokenizer):
         print(f"Resizing embeddings: {len(base_tokenizer)} → {len(tokenizer)}")
         model.resize_token_embeddings(len(tokenizer))
     
-    # Set up tokenizer properties
-    if tokenizer.eos_token is None:
-        tokenizer.eos_token = "</s>"
-        tokenizer.eos_token_id = tokenizer.convert_tokens_to_ids("</s>")
-    
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-        tokenizer.pad_token_id = tokenizer.eos_token_id
     
     return model, tokenizer
 
@@ -220,10 +209,12 @@ def main():
     if eval_dataset:
         print(f"Evaluating on {len(eval_dataset)} examples")
     
+    from datetime import datetime
     # Create output directory
     output_dir = os.path.join(
         finetune_config["output_dir"], 
-        f"{finetune_config['run_name']}_lr{finetune_config['learning_rate']}"
+        f"{finetune_config['run_name']}_lr{finetune_config['learning_rate']}",
+        datetime.now().strftime("%Y%m%d-%H%M%S")
     )
     os.makedirs(output_dir, exist_ok=True)
     
@@ -264,11 +255,19 @@ def main():
     # Start training
     print("Starting instruction finetuning...")
     trainer_stats = trainer.train()
+
+    # Print model embedding dimensions
+    embedding = model.get_input_embeddings()
+    print(f"Model embedding dimensions: {embedding.weight.shape}")
     
     # Save final model
     print(f"Saving finetuned model to {output_dir}")
-    model.save_pretrained(output_dir)
+    from peft import PeftModel
+
+    merged_model = model.merge_and_unload()
+    merged_model.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
+
     
     # Save training stats
     import json
@@ -277,6 +276,42 @@ def main():
     
     print("Instruction finetuning completed successfully!")
     print(f"Model saved to: {output_dir}")
+
+    print("Loading the model and tokenizer again to check if everything is fine...")
+    try:
+        reloaded_model = FastLanguageModel.from_pretrained(
+            model_name=output_dir,
+            max_seq_length=finetune_config["max_seq_length"],
+            dtype=None,
+            load_in_4bit=True,  
+            device_map="cuda:0",
+        )[0]
+        reloaded_tokenizer = AutoTokenizer.from_pretrained(output_dir)
+        print("Reloaded model and tokenizer successfully.")
+
+        prompt = "ፕላኔቷን ምድር ግለጽ።"
+
+        text = f'''<|begin_of_text|><|user|>
+                    {prompt}<|end_of_turn|>
+                    <|assistant|>\n'''
+
+        inputs = tokenizer([text], return_tensors="pt").to("cuda")
+
+        from transformers import TextStreamer
+        text_streamer = TextStreamer(tokenizer)
+
+        _ = model.generate(
+            **inputs,
+            streamer=text_streamer,
+            max_new_tokens=128,
+            repetition_penalty=1.2,
+            do_sample=True,
+            top_k=8,
+            top_p=0.8,
+            temperature=0.5
+        )
+    except Exception as e:
+        print(f"Error reloading model or tokenizer: {e}")
     
     return model, tokenizer
 

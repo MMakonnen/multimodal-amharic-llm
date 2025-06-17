@@ -66,6 +66,11 @@ model = FastLanguageModel.get_peft_model(
 
 processed_datasets = []
 
+# A simple function to tokenize and count tokens
+def count_tokens(batch):
+    encodings = tokenizer(batch["text"], truncation=False, padding=False)
+    return {"num_tokens": [len(x) for x in encodings["input_ids"]]}
+
 for dataset_config in config["datasets"]:
 
     percent_int = int(dataset_config["fraction"] * 100)
@@ -76,6 +81,20 @@ for dataset_config in config["datasets"]:
     print("Loading dataset...")
     dataset = load_from_disk(dataset_path)
     print(f"Loaded {len(dataset)} samples.")
+
+    print("Counting tokens...")
+    token_counts_dataset = dataset.map(
+        count_tokens,
+        batched=True,
+        num_proc=4,
+        remove_columns=dataset.column_names # Free up memory by removing original columns
+    )
+
+    # Sum the token counts for the entire dataset
+    num_tokens_in_dataset = sum(token_counts_dataset["num_tokens"])
+
+    print(f"✅ Number of tokens in this dataset: {num_tokens_in_dataset:,}")
+    print("-" * 50)
 
     # Format text with EOS
     EOS_TOKEN = tokenizer.eos_token
@@ -100,7 +119,9 @@ dataset = concatenate_datasets(processed_datasets)
 model_id_clean = config["model_id"].split("/")[-1]
 seed = config.get("seed", 42)
 
-output_name = f"{config['lora_cpt_output_prefix']}{model_id_clean}-seed{seed}"
+import datetime
+timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+output_name = f"{config['lora_cpt_output_prefix']}{model_id_clean}-seed{seed}{timestamp}"
 output_dir = os.path.join("pretrained_models", output_name)
 os.makedirs(output_dir, exist_ok=True)
 

@@ -4,13 +4,6 @@ config = {
     # =============================================================================
     "datasets":[
         {
-            "data_id": "iocuydi/amharic-redpajama-synthetic",
-            "fraction": 0.01,
-            "data_dir": "data",
-            "data_name_base": "amharic-redpajama-synthetic",
-            "data_cache_dir": "./cache"
-        },
-        {
             "data_id": "l-jiao/amharic-wikipedia",
             "fraction": 1.0,
             "data_dir": "data",
@@ -23,15 +16,28 @@ config = {
             "data_dir": "data",
             "data_name_base": "amharic-news",
             "data_cache_dir": "./cache"
+        },
+        {
+            "data_id": "l-jiao/amharic-commoncrawl",
+            "fraction": 1.0,
+            "data_dir": "data",
+            "data_name_base": "amharic-commoncrawl",
+            "data_cache_dir": "./cache"
+        },
+        {
+            "data_id": "iocuydi/amharic-redpajama-synthetic",
+            "fraction": 0.15,
+            "data_dir": "data",
+            "data_name_base": "amharic-redpajama-synthetic",
+            "data_cache_dir": "./cache"
         }
-
     ],
 
     
     # =============================================================================
     # MODEL AND TOKENIZER SETTINGS
     # =============================================================================
-    "tokenizer_path": "rasyosef_tokenizer",
+    "tokenizer_path": "rasyosef/Llama-3.2-1B-Amharic",
     "model_id": "unsloth/Llama-3.2-1B-bnb-4bit",
     "max_seq_length": 2048,
     
