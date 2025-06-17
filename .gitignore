@@ -1,0 +1,16 @@
+amharic_tokenizer/cache
+amharic_tokenizer/gmon.out
+cache
+pipeline_under_dev
+__pycache__
+.DS_Store
+ref_code
+data
+_unsloth_temporary_saved_buffers
+trainer_output
+unsloth_compiled_cache
+finetuned_models
+test_finetuned_models
+pretrained_models
+processed_amharic_data
+llama3_tokenizer_amharic_extended

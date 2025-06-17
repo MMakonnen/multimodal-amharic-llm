@@ -1,0 +1,12 @@
+TODOS
+- integrate data pipeline with CPT (real data only variant and extended data variant with synthetic)
+- introduce train test validation splits
+- run MVP on euler cluster
+- setup conda env: python 3.10, ... -> update yaml
+- add instruction finetuning
+- modularize scripts (functions usw.)
+- retrain tokenizer with real data only
+- discuss and plan next steps
+- discuss and plan report
+- while euler is down test run pipeline on google collab
+- look some more into datasets and inspect data quality !!!, data correctly formatted for ideal training and mapped properly?

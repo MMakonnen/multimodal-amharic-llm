@@ -1,0 +1,38 @@
+name: amharic-llm-cluster
+channels:
+  - pytorch
+  - nvidia # For CUDA specific packages
+  - conda-forge # For many community-maintained packages
+  - defaults
+dependencies:
+  # Core Python
+  - python>=3.9
+
+  # For PyTorch and CUDA
+  # Ensure your NVIDIA drivers are compatible with the chosen CUDA toolkit version.
+  # Refer to: https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cuda-major-component-versions__table-cuda-toolkit-driver-versions
+  - pytorch::pytorch >=2.0.0 # Installs PyTorch
+  - pytorch::pytorch-cuda=12.1
+
+  ## uncomment the following lines if you need specific CUDA or PyTorch extension
+  ## uncomment first line if not on MACOS
+  # - pytorch::pytorch-cuda=12.1 # Specifies CUDA version for PyTorch (adjust if needed for your drivers)
+  # - pytorch::torchaudio # Uncomment if you need audio processing with PyTorch
+  # - pytorch::torchvision # Uncomment if you need image processing with PyTorch
+
+  # Essential for package management within Conda
+  - pip
+
+  # Pip-installed dependencies (from the previous requirements.txt for the script)
+  - pip:
+      # Core library for Hugging Face models and tokenizers
+      - transformers>=4.38.0,<5.0.0
+      # Library for easily accessing and using datasets
+      - datasets>=2.14.0,<3.0.0
+      # Hugging Face Tokenizers library (for SentencePieceBPETokenizer and other utilities)
+      - tokenizers>=0.15.0,<0.20.0
+      # SentencePiece library, used by tokenizers.SentencePieceBPETokenizer
+      - sentencepiece>=0.1.98,<0.3.0
+      # Accelerate helps with model loading and distributed training/inference
+      - accelerate>=0.25.0,<0.30.0
+      # - -e . # Uncomment if you need to install the current directory as a package in editable mode
