@@ -37,16 +37,28 @@ def format_instruction_from_processed_data(examples):
     Expected input format: {"input": str, "output": str}
     The input already contains the full formatted prompt from new_data_proc.py
     """
+
+    SIMPLE_CONCATENATION = False  # Set to True to simply concatenate input and output
+
     texts = []
     for i in range(len(examples["input"])):
         input_text = examples["input"][i]
         output_text = examples["output"][i]
         
-        # Combine input and output into a single training text
-        # It's REALLY written like that in the doc, although it feels strange for me
-        # to simply concatenate this stuff
-        text = input_text + "\n"+ output_text
-        texts.append(text)
+        if SIMPLE_CONCATENATION:
+            # Combine input and output into a single training text
+            # It's REALLY written like that in the doc, although it feels strange for me
+            # to simply concatenate this stuff
+            text = input_text + "\n"+ output_text
+            texts.append(text)
+        else:
+            # Use the full prompt format with instruction and response
+            text = f'''<|begin_of_text|><|user|>
+            {input_text}<|end_of_text|>
+            <|assistant|>
+            {output_text}<|end_of_text|>'''
+
+            texts.append(text)
     
     return {"text": texts}
 
@@ -74,6 +86,22 @@ def load_model_and_tokenizer():
         dtype=None,
         load_in_4bit=True,
         device_map="cuda:0",
+    )
+
+    # If using base model without LoRA, we need to set it up
+    if not finetune_config["use_pretrained_checkpoint"]:
+        model = FastLanguageModel.get_peft_model(
+        model,
+        r = 128, # Choose any number > 0 ! Suggested 8, 16, 32, 64, 128
+        target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
+                        "gate_proj", "up_proj", "down_proj"],
+        lora_alpha = 32,
+        lora_dropout = 0, # Supports any, but = 0 is optimized
+        bias = "none",    # Supports any, but = "none" is optimized
+        use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
+        random_state = 3407,
+        use_rslora = True,   # We support rank stabilized LoRA
+        loftq_config = None, # And LoftQ
     )
     
     
@@ -113,7 +141,7 @@ def load_instruction_dataset():
         print(f"Loading dataset from Hub: {finetune_config['instruction_dataset_id']}")
         dataset = load_dataset(finetune_config["instruction_dataset_id"], split="train")
     else:
-        # Load from the processed data files
+        # EXPECTED BEHAVIOR: Load from the processed data files. 
         print("Loading from processed Amharic instruction data...")
         
         # Try to load from test_output_amharic directory first
@@ -127,6 +155,7 @@ def load_instruction_dataset():
         else:
             # Fallback to creating sample data if files don't exist
             print("Processed data files not found")
+            return
             
     
     print(f"Loaded {len(dataset)} instruction examples.")
@@ -220,7 +249,7 @@ def main():
             bf16=is_bfloat16_supported(),
             optim="adamw_8bit",
             weight_decay=finetune_config["weight_decay"],
-            lr_scheduler_type="cosine",
+            lr_scheduler_type="linear",
             logging_steps=finetune_config["logging_steps"],
             eval_strategy=finetune_config["eval_strategy"] if eval_dataset else "no",
             eval_steps=finetune_config["eval_steps"] if eval_dataset else None,

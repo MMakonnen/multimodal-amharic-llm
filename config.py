@@ -3,13 +3,13 @@ config = {
     # DATASET SETTINGS
     # =============================================================================
     "datasets":[
-    #     {
-    #         "data_id": "iocuydi/amharic-redpajama-synthetic",
-    #         "fraction": 0.01,
-    #         "data_dir": "data",
-    #         "data_name_base": "amharic-redpajama-synthetic",
-    #         "data_cache_dir": "./cache"
-    #     },
+        {
+            "data_id": "iocuydi/amharic-redpajama-synthetic",
+            "fraction": 0.01,
+            "data_dir": "data",
+            "data_name_base": "amharic-redpajama-synthetic",
+            "data_cache_dir": "./cache"
+        },
         {
             "data_id": "l-jiao/amharic-wikipedia",
             "fraction": 1.0,
@@ -31,7 +31,7 @@ config = {
     # =============================================================================
     # MODEL AND TOKENIZER SETTINGS
     # =============================================================================
-    "tokenizer_path": "llama3_tokenizer_amharic_extended",
+    "tokenizer_path": "rasyosef_tokenizer",
     "model_id": "unsloth/Llama-3.2-1B-bnb-4bit",
     "max_seq_length": 2048,
     
@@ -52,7 +52,7 @@ config = {
     # =============================================================================
 
     "full_epoch": True, # If True, runs for 'num_train_epochs' otherwise runs for 'max_steps'
-    "per_device_train_batch_size": 2,
+    "per_device_train_batch_size": 8,
     "gradient_accumulation_steps": 8,
     "max_steps": 100, # useful for quick testing if things are running smoothly
     "num_train_epochs": 1, # if computationally feasible increase to 2-3 to improve learning

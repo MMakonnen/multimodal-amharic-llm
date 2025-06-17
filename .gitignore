@@ -14,3 +14,4 @@ test_finetuned_models
 pretrained_models
 processed_amharic_data
 llama3_tokenizer_amharic_extended
+rasyosef_tokenizer
