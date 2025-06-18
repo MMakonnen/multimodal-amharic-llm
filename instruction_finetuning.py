@@ -50,10 +50,7 @@ def format_instruction_from_processed_data(examples):
             texts.append(text)
         else:
             # Use the full prompt format with instruction and response
-            text = f'''<|begin_of_text|><|user|>
-            {input_text}<|end_of_turn|>
-            <|assistant|>
-            {output_text}<|end_of_turn|>'''
+            text = f"{input_text}\nANSWER\n{output_text}"
 
             texts.append(text)
     
@@ -102,14 +99,19 @@ def load_model_and_tokenizer():
     )
     
     
-    # Load custom tokenizer
-    print("Loading custom Amharic tokenizer from:", finetune_config["tokenizer_path"])
-    tokenizer = AutoTokenizer.from_pretrained(finetune_config["tokenizer_path"])
+    # # Load custom tokenizer
+    # print("Loading custom Amharic tokenizer from:", finetune_config["tokenizer_path"])
+    # tokenizer = AutoTokenizer.from_pretrained(finetune_config["tokenizer_path"])
 
-    # Handle vocabulary size mismatch
-    if len(tokenizer) != len(base_tokenizer):
-        print(f"Resizing embeddings: {len(base_tokenizer)} → {len(tokenizer)}")
-        model.resize_token_embeddings(len(tokenizer))
+    # # Handle vocabulary size mismatch
+    # if len(tokenizer) != len(base_tokenizer):
+    #     print(f"Tokenizer length mismatch: {len(base_tokenizer)} → {len(tokenizer)}")
+    # if not finetune_config["use_pretrained_checkpoint"]:
+    #     print("Resizing model embeddings to match tokenizer size.")
+    #     model.resize_token_embeddings(len(tokenizer))
+    # else:
+    #     print("⚠️ Skipping embedding resize since we're loading a LoRA-wrapped model.")
+    tokenizer = base_tokenizer
     
     
     return model, tokenizer
@@ -195,6 +197,10 @@ def main():
     
     # Format dataset using the processed data format from new_data_proc.py
     formatted_dataset = format_dataset(dataset, tokenizer)
+
+    # print an example from the formatted dataset
+    print("Example from formatted dataset:")
+    print(formatted_dataset[0]["text"])
     
     # Don't do eval for now. takes too much time
     if False and len(formatted_dataset) > 100:  # Only split if we have enough data
@@ -262,7 +268,6 @@ def main():
     
     # Save final model
     print(f"Saving finetuned model to {output_dir}")
-    from peft import PeftModel
 
     merged_model = model.merge_and_unload()
     merged_model.save_pretrained(output_dir)
@@ -293,9 +298,7 @@ def main():
 
         prompt = "ፕላኔቷን ምድር ግለጽ።"
 
-        text = f'''<|begin_of_text|><|user|>
-                    {prompt}<|end_of_turn|>
-                    <|assistant|>\n'''
+        text = f'''<|begin_of_text|><|user|>\n{prompt}<|end_of_turn|>\n<|assistant|>\n'''
 
         inputs = tokenizer([text], return_tensors="pt").to("cuda")
 

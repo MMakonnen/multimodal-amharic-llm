@@ -1,11 +1,6 @@
 from unsloth import FastLanguageModel
-from transformers import AutoTokenizer # Import AutoTokenizer
 
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from peft import PeftModel
-import torch
-
-model_path = "rasyosef/Llama-3.2-400M-Amharic-Instruct" # Path to your saved PEFT checkpoint
+model_path = "finetuned_models/amharic_instruction_finetune_lr5e-05/20250618-012702_rasyosef_pretrained_8epochs_finetuned" # Path to your saved PEFT checkpoint
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=model_path,
@@ -14,22 +9,15 @@ model, tokenizer = FastLanguageModel.from_pretrained(
     load_in_4bit=True,
 )
 
+
 embedding = model.get_input_embeddings()
 print(f"Model embedding dimensions: {embedding.weight.shape}")
 
-
 FastLanguageModel.for_inference(model)
 # Proper chat prompt
-prompt = "ጨረቃን ግለጽ።"
+prompt = "ፕላኔቷን ምድር ግለጽ።"
 
-text = f'''<|begin_of_text|><|user|>
-            {prompt}<|end_of_turn|>
-            <|assistant|>\n'''
-
-# text = f'''<|im_start|>user
-# {prompt}<|im_end|>
-# <|im_start|>assistant
-# '''
+text = "<|begin_of_text|><|user|>\n{input_text}\n<|end_of_turn|><|assistant|>\n"
 
 inputs = tokenizer([text], return_tensors="pt").to("cuda")
 
@@ -39,8 +27,8 @@ text_streamer = TextStreamer(tokenizer)
 _ = model.generate(
     **inputs,
     streamer=text_streamer,
-    max_new_tokens=128,
-    repetition_penalty=1.2,
+    max_new_tokens=1024*10,
+    repetition_penalty=1.5,
     do_sample=True,
     top_k=8,
     top_p=0.8,

@@ -33,7 +33,7 @@ def compute_perplexity(model, tokenizer, dataset, max_length=2048):
 
 # Iterate through checkpoints
 perplexities = []
-checkpoints = range(1000, 24001, 1000)
+checkpoints = range(1000, 59001, 1000)
 
 for step in checkpoints:
     checkpoint_path = f"trainer_output/checkpoint-{step}"

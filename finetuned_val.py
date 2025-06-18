@@ -1,25 +1,31 @@
 from unsloth import FastLanguageModel
-from transformers import AutoTokenizer
 import torch
 import math
-from datasets import load_from_disk
+import json
+from datasets import Dataset
 
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name="trainer_output/checkpoint-59000",
+    model_name="trainer_output/checkpoint-44000",
     max_seq_length=2048,
     dtype=None,
     load_in_4bit=True,
     device_map="cuda:0",
 )
 
-from datasets import load_dataset
+# Load JSON file with input-output pairs
+with open("processed_amharic_data/test.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
 
-dataset = load_from_disk("data/amharic-redpajama-synthetic_001")
+# Define a format function to concatenate input and output
+def format_example(example):
+    return {"text": example["input"] + " " + example["output"]}
 
-# Get bottom 0.1% of the dataset
-num_samples = max(1, int(len(dataset) * 0.001))
-bottom_dataset = dataset.select(range(len(dataset) - num_samples, len(dataset)))
+# Pipe through the format function
+formatted_data = [format_example(example) for example in data]
+
+# Convert to HuggingFace Dataset
+dataset = Dataset.from_list(formatted_data)
 
 
 FastLanguageModel.for_inference(model)
@@ -45,5 +51,5 @@ def compute_perplexity(model, tokenizer, dataset, max_length=2048):
     return perplexity
 
 # Step 4: Calculate perplexity
-ppl = compute_perplexity(model, tokenizer, bottom_dataset)
+ppl = compute_perplexity(model, tokenizer, dataset)
 print(f"Perplexity on bottom 0.1% of dataset: {ppl}")
