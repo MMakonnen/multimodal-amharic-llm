@@ -14,8 +14,8 @@ NEW_AMHARIC_VOCAB_SIZE = 10000 # Adjust based on dataset size and needs
 print(f"Loading Amharic datasets")
 datasets = [
     load_dataset("l-jiao/amharic-news", split="train"),
-    load_dataset("l-jiao/amharic-wikipedia", split="train")
-    # load_dataset("l-jiao/amharic-common-crawl", split="train")
+    load_dataset("l-jiao/amharic-wikipedia", split="train"),
+    load_dataset("l-jiao/amharic-commoncrawl", split="train")
 ]
 datasets = [dataset.remove_columns([col for col in dataset.column_names if col != "text"]) for dataset in datasets]
 dataset = concatenate_datasets(datasets)

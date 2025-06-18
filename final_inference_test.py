@@ -5,7 +5,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 import torch
 
-model_path = "test_finetuned_models/minimal_test_lr1e-05/20250618-000817" # Path to your saved PEFT checkpoint
+model_path = "rasyosef/Llama-3.2-400M-Amharic-Instruct" # Path to your saved PEFT checkpoint
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=model_path,
@@ -20,11 +20,16 @@ print(f"Model embedding dimensions: {embedding.weight.shape}")
 
 FastLanguageModel.for_inference(model)
 # Proper chat prompt
-prompt = "ፕላኔቷን ምድር ግለጽ።"
+prompt = "ጨረቃን ግለጽ።"
 
 text = f'''<|begin_of_text|><|user|>
             {prompt}<|end_of_turn|>
             <|assistant|>\n'''
+
+# text = f'''<|im_start|>user
+# {prompt}<|im_end|>
+# <|im_start|>assistant
+# '''
 
 inputs = tokenizer([text], return_tensors="pt").to("cuda")
 

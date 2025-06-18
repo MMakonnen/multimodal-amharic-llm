@@ -16,7 +16,7 @@ os.environ["UNSLOTH_RETURN_LOGITS"] = "1"
 
 
 # Set this to True to use minimal resources for testing
-USE_TEST_CONFIG = True
+USE_TEST_CONFIG = False
 
 if USE_TEST_CONFIG:
     print("⚠️  USING TEST CONFIGURATION")
@@ -288,6 +288,8 @@ def main():
         )[0]
         reloaded_tokenizer = AutoTokenizer.from_pretrained(output_dir)
         print("Reloaded model and tokenizer successfully.")
+
+        print("Testing the reloaded model with a sample prompt...")
 
         prompt = "ፕላኔቷን ምድር ግለጽ።"
 

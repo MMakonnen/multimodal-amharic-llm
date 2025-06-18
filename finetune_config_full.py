@@ -8,13 +8,13 @@ finetune_config = {
         # Model settings - can use continued pretrained model
         "base_model_path": "pretrained_models/lora_cpt_Llama-3.2-1B-bnb-4bit-seed42", # Path to your continued pretrained model, or use config["model_id"]
         "use_pretrained_checkpoint": False,  # False to train from llama3 base, True to train from continued pretrained checkpoint
-        "model_id": "rasyosef/Llama-3.2-1B-Amharic",  # Base model ID 
+        "model_id": "unsloth/Llama-3.2-1B-bnb-4bit",  # Base model ID 
         "tokenizer_path": "./rasyosef_tokenizer_w_special_tokens",  
 
         # Training hyperparameters for instruction finetuning
         "per_device_train_batch_size": 8,
         "gradient_accumulation_steps": 16,
-        "num_train_epochs": 1,
+        "num_train_epochs": 8,
         "max_steps": -1,  # -1 to use epochs instead
         "warmup_steps": 100,
         "learning_rate": 5e-5, 
