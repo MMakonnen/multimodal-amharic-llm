@@ -14,6 +14,7 @@ import finetune_config_full
 # Set env variable
 os.environ["UNSLOTH_RETURN_LOGITS"] = "1"
 
+print("BFLOAT16?\n", is_bfloat16_supported())
 
 # Set this to True to use minimal resources for testing
 USE_TEST_CONFIG = False
@@ -23,6 +24,40 @@ if USE_TEST_CONFIG:
     finetune_config = finetune_config_full.test_config
 else: 
     finetune_config = finetune_config_full.finetune_config
+
+# take command line arguments with argparse
+import argparse
+parser = argparse.ArgumentParser(description="Amharic LLM Instruction Finetuning")
+parser.add_argument(
+    "--base_model_path",
+    type=str,
+    default=finetune_config["base_model_path"],
+    help="Path to the base model or continued pretrained checkpoint",
+)
+parser.add_argument(
+    "--use_pretrained_checkpoint",
+    action="store_true",
+    default=finetune_config["use_pretrained_checkpoint"],
+    help="Use a continued pretrained checkpoint instead of the base model",
+)
+parser.add_argument(
+    "--model_id",
+    type=str,
+    default=finetune_config["model_id"],
+    help="HuggingFace model ID for the base model",
+)
+parser.add_argument(
+    "--run_name",
+    type=str,
+    default=finetune_config["run_name"],
+    help="Name for the training run",
+)
+
+args = parser.parse_args()
+finetune_config["base_model_path"] = args.base_model_path
+finetune_config["use_pretrained_checkpoint"] = args.use_pretrained_checkpoint
+finetune_config["model_id"] = args.model_id
+run_name = args.run_name
 
 # =============================================================================
 # INSTRUCTION FORMATTING FUNCTIONS
@@ -50,7 +85,7 @@ def format_instruction_from_processed_data(examples):
             texts.append(text)
         else:
             # Use the full prompt format with instruction and response
-            text = f"{input_text}\nANSWER\n{output_text}"
+            text = f"{input_text}\n<|reserved_special_token_42|>\n{output_text}"
 
             texts.append(text)
     
@@ -82,21 +117,29 @@ def load_model_and_tokenizer():
         device_map="cuda:0",
     )
 
-    # If using base model without LoRA, we need to set it up
     if not finetune_config["use_pretrained_checkpoint"]:
         model = FastLanguageModel.get_peft_model(
-        model,
-        r = 128, # Choose any number > 0 ! Suggested 8, 16, 32, 64, 128
-        target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
-                        "gate_proj", "up_proj", "down_proj"],
-        lora_alpha = 32,
-        lora_dropout = 0, # Supports any, but = 0 is optimized
-        bias = "none",    # Supports any, but = "none" is optimized
-        use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
-        random_state = 3407,
-        use_rslora = True,   # We support rank stabilized LoRA
-        loftq_config = None, # And LoftQ
-    )
+            model,
+            r = 128, # Choose any number > 0 ! Suggested 8, 16, 32, 64, 128
+            target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
+                            "gate_proj", "up_proj", "down_proj"],
+            lora_alpha = 32,
+            lora_dropout = 0, # Supports any, but = 0 is optimized
+            bias = "none",    # Supports any, but = "none" is optimized
+            use_gradient_checkpointing = "unsloth", # True or "unsloth" for very long context
+            random_state = 3407,
+            use_rslora = True,   # We support rank stabilized LoRA
+            loftq_config = None, # And LoftQ
+        )
+    else:
+        print("⚠️ Loading a LoRA-wrapped model.")
+        for name, param in model.named_parameters():
+        # We target the full parameter name, not just the module name
+            if "embed_tokens" in name or "lm_head" in name:
+                # Set requires_grad to False to freeze the layer
+                param.requires_grad = False
+                print("Frozen:" ,name, param.shape)
+
     
     
     # # Load custom tokenizer
@@ -111,8 +154,19 @@ def load_model_and_tokenizer():
     #     model.resize_token_embeddings(len(tokenizer))
     # else:
     #     print("⚠️ Skipping embedding resize since we're loading a LoRA-wrapped model.")
-    tokenizer = base_tokenizer
-    
+
+    if finetune_config["use_pretrained_checkpoint"]:
+        tokenizer = base_tokenizer
+    else:
+        # Load custom tokenizer
+        print("Loading custom Amharic tokenizer from:", finetune_config["tokenizer_path"])
+        tokenizer = AutoTokenizer.from_pretrained(finetune_config["tokenizer_path"])
+
+        # Handle vocabulary size mismatch
+        if len(tokenizer) != len(base_tokenizer):
+            print(f"Tokenizer length mismatch: {len(base_tokenizer)} → {len(tokenizer)}")
+            print("Resizing model embeddings to match tokenizer size.")
+            model.resize_token_embeddings(len(tokenizer))
     
     return model, tokenizer
 
@@ -220,7 +274,7 @@ def main():
     output_dir = os.path.join(
         finetune_config["output_dir"], 
         f"{finetune_config['run_name']}_lr{finetune_config['learning_rate']}",
-        datetime.now().strftime("%Y%m%d-%H%M%S")
+        datetime.now().strftime("%Y%m%d-%H%M%S") + f"_{run_name}"
     )
     os.makedirs(output_dir, exist_ok=True)
     
@@ -298,7 +352,7 @@ def main():
 
         prompt = "ፕላኔቷን ምድር ግለጽ።"
 
-        text = f'''<|begin_of_text|><|user|>\n{prompt}<|end_of_turn|>\n<|assistant|>\n'''
+        text = f"{prompt}\n<|reserved_special_token_42|>\n"
 
         inputs = tokenizer([text], return_tensors="pt").to("cuda")
 

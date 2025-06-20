@@ -18,3 +18,9 @@ llama3_tokenizer_amharic_extended_2sources
 llama3_tokenizer_amharic_extended_3sources
 rasyosef_tokenizer_w_special_tokens
 perplexity_plot.png
+loss_vs_timestep_updated.pdf
+loss_vs_timestep.pdf
+perplexity_plot.pdf
+merged_pretrained_models
+MMLU/*.csv
+perplexities.txt

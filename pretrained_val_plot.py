@@ -1,10 +1,9 @@
-import os
+from unsloth import FastLanguageModel
 import torch
 import math
 import matplotlib.pyplot as plt
 from datasets import load_from_disk
 from transformers import AutoTokenizer
-from unsloth import FastLanguageModel
 
 # Load dataset
 dataset = load_from_disk("data/amharic-redpajama-synthetic_001")
@@ -56,14 +55,21 @@ for step in checkpoints:
         print(f"Error loading or evaluating checkpoint {step}: {e}")
         perplexities.append(None)
 
-# Plot results
+# Plot results with log scale for y-axis
 plt.figure(figsize=(10, 6))
 plt.plot(checkpoints, perplexities, marker='o', linestyle='-', color='blue')
 plt.title("Perplexity over Training Steps")
 plt.xlabel("Checkpoint Step")
 plt.ylabel("Perplexity")
-plt.grid(True)
+plt.yscale('log')
+plt.grid(True, which='both', axis='y')
 plt.xticks(checkpoints, rotation=45)
 plt.tight_layout()
-plt.savefig("perplexity_plot.png")
-print("Plot saved as perplexity_plot.png")
+plt.savefig("perplexity_plot.pdf")
+print("Plot saved as perplexity_plot.pdf")
+
+# store perplexities in a text file
+with open("perplexities.txt", "w") as f:
+    for step, ppl in zip(checkpoints, perplexities):
+        f.write(f"Checkpoint {step}: {ppl}\n")
+print("Perplexities saved to perplexities.txt")

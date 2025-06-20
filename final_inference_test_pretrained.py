@@ -1,6 +1,6 @@
 from unsloth import FastLanguageModel
 
-model_path = "finetuned_models/amharic_instruction_finetune_lr5e-05/20250619-044853_rasyosef" # Path to your saved PEFT checkpoint
+model_path = "trainer_output/checkpoint-96500" # Path to your saved PEFT checkpoint
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=model_path,
@@ -9,18 +9,11 @@ model, tokenizer = FastLanguageModel.from_pretrained(
     load_in_4bit=True,
 )
 
-# print eos token from tokenizer
-print(f"Tokenizer EOS token: {tokenizer.eos_token}")
-
-
-embedding = model.get_input_embeddings()
-print(f"Model embedding dimensions: {embedding.weight.shape}")
-
 FastLanguageModel.for_inference(model)
 # Proper chat prompt
-# prompt = "ፕላኔቷን ምድር ግለጽ።"
+prompt = "ሦስት የአውሮፓ አገሮችን ጥቀስ"
 
-text = f'''ሶስት የአፍሪካ ሀገራትን ጥቀስ\n<|reserved_special_token_42|>\n'''
+text = f"{prompt}"
 
 inputs = tokenizer([text], return_tensors="pt").to("cuda")
 
@@ -35,5 +28,7 @@ _ = model.generate(
     do_sample=True,
     top_k=8,
     top_p=0.8,
-    temperature=0.5
+    temperature=0.5,
+    eos_token_id=tokenizer.eos_token_id,
+
 )

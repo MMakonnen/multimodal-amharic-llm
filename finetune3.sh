@@ -50,11 +50,10 @@ echo "Conda activated"
 cd ${DIRECTORY}
 
 # Execute your code
-python3 instruction_finetuning.py --use_pretrained_checkpoint --base_model_path "trainer_output/checkpoint-59000" --run_name "ours_method2"
-
+python3 instruction_finetuning.py --model_id "unsloth/Llama-3.2-1B-bnb-4bit" --run_name "llama3-base"
 
 # Send more noteworthy information to the output log
-echo "Finished at: $(date) OURS"
+echo "Finished at: $(date) LLAMA3 BASE"
 
 # End the script with exit code 0
 exit 0

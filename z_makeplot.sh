@@ -50,7 +50,7 @@ echo "Conda activated"
 cd ${DIRECTORY}
 
 # Execute your code
-python3 instruction_finetuning.py --use_pretrained_checkpoint --base_model_path "trainer_output/checkpoint-59000" --run_name "ours_method2"
+python3 pretrained_val_plot.py
 
 
 # Send more noteworthy information to the output log
