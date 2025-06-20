@@ -1,4 +1,5 @@
-# Multimodal Amharic LLM
+# Building an Amharic LLM with LoRA-based CPT
+This is the repo for our project for the course CSNLP. 
 Follow the instructions below to run the full pipeline.
 
 ## Environment Setup
