@@ -34,5 +34,4 @@ Follow the steps in order:
 Use `final_inference_test.py`.  
 
 ## Benchmarking
-TODO.   
-- Data sources: Maybe `CohereLabs/Global-MMLU`, can also translate ourselves.  
+Use `MMLU/MMLU.py`.
